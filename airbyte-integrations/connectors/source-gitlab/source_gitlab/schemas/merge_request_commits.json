@@ -12,7 +12,7 @@
       "type": ["null", "integer"]
     },
     "short_id": {
-      "type": ["null", "integer"]
+      "type": ["null", "string"]
     },
     "created_at": {
       "type": ["null", "string"],
@@ -35,14 +35,14 @@
       "format": "date-time"
     },
     "committer_name": {
-      "type": ["null", "object"]
+      "type": ["null", "string"]
     },
     "committer_email": {
-      "type": ["null", "string"],
-      "format": "date-time"
+      "type": ["null", "string"]
     },
     "committed_date": {
-      "type": ["null", "object"]
+      "type": ["null", "string"],
+      "format": "date-time"
     },
     "trailers": {
       "type": ["null", "object"]
