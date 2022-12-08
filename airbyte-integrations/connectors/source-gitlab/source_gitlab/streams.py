@@ -10,6 +10,7 @@ import pendulum
 import requests
 from airbyte_cdk.models import SyncMode
 from airbyte_cdk.sources.streams.http import HttpStream
+from airbyte_cdk.sources.streams.core import StreamData
 
 
 class GitlabStream(HttpStream, ABC):
@@ -18,7 +19,7 @@ class GitlabStream(HttpStream, ABC):
     flatten_id_keys = []
     flatten_list_keys = []
     page = 1
-    per_page = 50
+    per_page = 100
 
     def __init__(self, api_url: str, **kwargs):
         super().__init__(**kwargs)
@@ -261,6 +262,65 @@ class MergeRequestCommits(GitlabChildStream):
         record["merge_request_iid"] = stream_slice["iid"]
 
         return record
+
+class MergeRequestCommitDetails(GitlabChildStream):
+    path_list = ["project_id", "short_id", "merge_request_iid"]
+    path_template = "projects/{project_id}/repository/commits/{short_id}"
+
+    def transform(self, record, stream_slice: Mapping[str, Any] = None, **kwargs):
+        super().transform(record, stream_slice, **kwargs)
+        record["project_id"] = stream_slice["project_id"]
+        record["merge_request_iid"] = stream_slice["merge_request_iid"]
+
+        return record
+
+
+class MergeRequestCommitMergeDetails(GitlabChildStream):
+    path_list = ["project_id", "merge_commit_sha", "iid"]
+    path_template = "projects/{project_id}/repository/commits/{merge_commit_sha}"
+
+    def transform(self, record, stream_slice: Mapping[str, Any] = None, **kwargs):
+        super().transform(record, stream_slice, **kwargs)
+        record["project_id"] = stream_slice["project_id"]
+        record["merge_request_iid"] = stream_slice["iid"]
+
+        return record
+
+    def read_records(
+        self,
+        sync_mode: SyncMode,
+        cursor_field: List[str] = None,
+        stream_slice: Mapping[str, Any] = None,
+        stream_state: Mapping[str, Any] = None,
+    ) -> Iterable[StreamData]:
+        if(stream_slice['merge_commit_sha'] == None):
+            return []
+        else:
+            return super().read_records(sync_mode, cursor_field, stream_slice, stream_state)
+
+class MergeRequestCommitSquashDetails(GitlabChildStream):
+    path_list = ["project_id", "squash_commit_sha", "iid"]
+    path_template = "projects/{project_id}/repository/commits/{squash_commit_sha}"
+
+    def transform(self, record, stream_slice: Mapping[str, Any] = None, **kwargs):
+        super().transform(record, stream_slice, **kwargs)
+        record["project_id"] = stream_slice["project_id"]
+        record["merge_request_iid"] = stream_slice["iid"]
+
+        return record
+
+    def read_records(
+        self,
+        sync_mode: SyncMode,
+        cursor_field: List[str] = None,
+        stream_slice: Mapping[str, Any] = None,
+        stream_state: Mapping[str, Any] = None,
+    ) -> Iterable[StreamData]:
+        if(stream_slice['squash_commit_sha'] == None):
+            return []
+        else:
+            return super().read_records(sync_mode, cursor_field, stream_slice, stream_state)
+
 
 
 class Releases(GitlabChildStream):
