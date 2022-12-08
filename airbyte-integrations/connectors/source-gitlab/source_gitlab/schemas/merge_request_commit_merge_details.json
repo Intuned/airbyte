@@ -2,14 +2,14 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "id": {
-      "type": ["null", "integer"]
-    },
     "project_id": {
       "type": ["null", "integer"]
     },
     "merge_request_iid": {
       "type": ["null", "integer"]
+    },
+    "id": {
+      "type": ["null", "string"]
     },
     "short_id": {
       "type": ["null", "string"]
@@ -19,12 +19,18 @@
       "format": "date-time"
     },
     "parent_ids": {
-      "type": ["null", "array"]
+      "type": ["null", "array"],
+      "items": {
+        "type": ["null", "string"]
+      }
     },
     "title": {
       "type": ["null", "string"]
     },
     "message": {
+      "type": ["null", "string"]
+    },
+    "author_name": {
       "type": ["null", "string"]
     },
     "author_email": {
@@ -49,6 +55,20 @@
     },
     "web_url": {
       "type": ["null", "string"]
+    },
+    "stats": {
+      "type": ["null", "object"],
+      "properties": {
+        "additions": {
+          "type": ["null", "integer"]
+        },
+        "deletions": {
+          "type": ["null", "integer"]
+        },
+        "total": {
+          "type": ["null", "integer"]
+        }
+      }
     }
   }
 }

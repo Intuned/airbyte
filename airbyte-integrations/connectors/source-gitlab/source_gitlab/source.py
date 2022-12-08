@@ -36,6 +36,12 @@ from .streams import (
     Releases,
     Tags,
     Users,
+    MergeRequestApprovals,
+    MergeRequestNotes,
+    MergeRequestPipelines,
+    MergeRequestCommitDetails,
+    MergeRequestCommitMergeDetails,
+    MergeRequestCommitSquashDetails,
 )
 
 
@@ -98,6 +104,7 @@ class SourceGitlab(AbstractSource):
         pipelines = Pipelines(parent_stream=projects, start_date=config["start_date"], **auth_params)
         merge_requests = MergeRequests(parent_stream=projects, start_date=config["start_date"], **auth_params)
         epics = Epics(parent_stream=groups, **auth_params)
+        merge_request_commits = MergeRequestCommits(parent_stream=merge_requests, **auth_params)
 
         streams = [
             groups,
@@ -116,12 +123,18 @@ class SourceGitlab(AbstractSource):
             ProjectLabels(parent_stream=projects, **auth_params),
             GroupLabels(parent_stream=groups, **auth_params),
             merge_requests,
-            MergeRequestCommits(parent_stream=merge_requests, **auth_params),
+            merge_request_commits,
             Releases(parent_stream=projects, **auth_params),
             Tags(parent_stream=projects, repository_part=True, **auth_params),
             pipelines,
             PipelinesExtended(parent_stream=pipelines, **auth_params),
             Users(parent_stream=projects, **auth_params),
+            MergeRequestApprovals(parent_stream=merge_requests, **auth_params),
+            MergeRequestNotes(parent_stream=merge_requests, **auth_params),
+            MergeRequestPipelines(parent_stream=merge_requests, **auth_params),
+            MergeRequestCommitDetails(parent_stream=merge_request_commits, **auth_params),
+            MergeRequestCommitMergeDetails(parent_stream=merge_requests, **auth_params),
+            MergeRequestCommitSquashDetails(parent_stream=merge_requests, **auth_params),
         ]
 
         return streams
