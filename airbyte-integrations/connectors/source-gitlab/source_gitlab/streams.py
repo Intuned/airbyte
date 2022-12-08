@@ -75,6 +75,9 @@ class GitlabStream(HttpStream, ABC):
     def _flatten_list(self, record: Dict[str, Any], target: str):
         record[target] = [target_data.get("id") for target_data in record.get(target, [])]
 
+    def backoff_time(self, response: requests.Response) -> Optional[float]:
+        return 61
+
 
 class GitlabChildStream(GitlabStream):
     path_list = ["id"]
