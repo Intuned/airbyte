@@ -9,7 +9,7 @@ from airbyte_cdk import AirbyteLogger
 from airbyte_cdk.models import SyncMode
 from airbyte_cdk.sources import AbstractSource
 from airbyte_cdk.sources.streams import Stream
-from airbyte_cdk.sources.streams.http.auth import MultipleTokenAuthenticator
+from .authenticator import GithubIntunedAuthenticator
 
 from .streams import (
     Assignees,
@@ -58,12 +58,12 @@ DEFAULT_PAGE_SIZE_FOR_LARGE_STREAM = 10
 
 class SourceGithub(AbstractSource):
     @staticmethod
-    def _get_org_repositories(config: Mapping[str, Any], authenticator: MultipleTokenAuthenticator) -> Tuple[List[str], List[str]]:
+    def _get_org_repositories(config: Mapping[str, Any], authenticator: GithubIntunedAuthenticator) -> Tuple[List[str], List[str]]:
         """
         Parse config.repository and produce two lists: organizations, repositories.
         Args:
             config (dict): Dict representing connector's config
-            authenticator(MultipleTokenAuthenticator): authenticator object
+            authenticator(GithubIntunedAuthenticator): authenticator object
         """
         config_repositories = set(filter(None, config["repository"].split(" ")))
         if not config_repositories:
@@ -104,14 +104,8 @@ class SourceGithub(AbstractSource):
 
     @staticmethod
     def _get_authenticator(config: Dict[str, Any]):
-        # Before we supported oauth, personal_access_token was called `access_token` and it lived at the
-        # config root. So we first check to make sure any backwards compatbility is handled.
-        token = config.get("access_token")
-        if not token:
-            creds = config.get("credentials")
-            token = creds.get("access_token") or creds.get("personal_access_token")
-        tokens = [t.strip() for t in token.split(TOKEN_SEPARATOR)]
-        return MultipleTokenAuthenticator(tokens=tokens, auth_method="token")
+        credentials = config.get("credentials")
+        return GithubIntunedAuthenticator(installation_id=credentials["installationId"], token_refresh_endpoint=credentials["refresh_api"], secret=credentials["secret"])
 
     @staticmethod
     def _get_branches_data(selected_branches: str, full_refresh_args: Dict[str, Any] = None) -> Tuple[Dict[str, str], Dict[str, List[str]]]:
